@@ -9,6 +9,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Check deployment secrets
+        env:
+          DEPLOY_HOST: ${{ secrets.SSH_HOST }}
+          DEPLOY_USERNAME: ${{ secrets.SSH_USERNAME }}
+          DEPLOY_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          test -n "$DEPLOY_HOST" || { echo "SSH_HOST fehlt in den Repository Secrets" >&2; exit 1; }
+          test -n "$DEPLOY_USERNAME" || { echo "SSH_USERNAME fehlt in den Repository Secrets" >&2; exit 1; }
+          test -n "$DEPLOY_KEY" || { echo "SSH_KEY fehlt in den Repository Secrets" >&2; exit 1; }
+
       - name: Deploy to Hetzner VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
