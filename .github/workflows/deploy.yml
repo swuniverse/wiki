@@ -1,0 +1,27 @@
+name: Deploy Wiki.js
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Hetzner VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          command_timeout: 15m
+          script: |
+            set -e
+            cd /opt/swuniverse/wiki
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+            chmod +x deploy-remote.sh
+            ./deploy-remote.sh

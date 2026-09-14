@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  wiki:
+    image: requarks/wiki:2
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:?set POSTGRES_DB}
+      PORT: 3000
+      BINDIP: 0.0.0.0
+    expose:
+      - '3000'
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - wiki_data:/wiki/data
+    networks:
+      - default
+      - proxy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  wiki_data:
+
+networks:
+  proxy:
+    external: true
+    name: swuniverse_proxy

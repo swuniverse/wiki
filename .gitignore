@@ -1,0 +1,13 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local/editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Runtime and backup data
+backup/*
+!backup/.gitkeep
